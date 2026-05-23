@@ -1,183 +1,233 @@
+```html id="spacegame782"
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual QA Resume</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Space Meteor Game</title>
 
-    <style>
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family: Arial, sans-serif;
-        }
+<style>
+    body{
+        margin:0;
+        overflow:hidden;
+        background:black;
+        font-family:Arial, sans-serif;
+        cursor:none;
+    }
 
-        body{
-            background:#0f0f0f;
-            color:#ffffff;
-            padding:40px;
-        }
+    canvas{
+        display:block;
+        background:linear-gradient(to bottom,#000000,#050520);
+    }
 
-        .container{
-            max-width:900px;
-            margin:0 auto;
-            background:#1a1a1a;
-            border:2px solid #ffd000;
-            border-radius:16px;
-            padding:40px;
-            box-shadow:0 0 20px rgba(255,208,0,0.3);
-        }
+    #score{
+        position:absolute;
+        top:20px;
+        left:20px;
+        color:#ffe600;
+        font-size:28px;
+        font-weight:bold;
+    }
 
-        .header{
-            text-align:center;
-            margin-bottom:40px;
-        }
+    #gameOver{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        color:#ffe600;
+        font-size:50px;
+        display:none;
+        text-align:center;
+    }
 
-        .header h1{
-            color:#ffd000;
-            font-size:42px;
-            margin-bottom:10px;
-        }
-
-        .header p{
-            color:#cccccc;
-            font-size:18px;
-        }
-
-        .section{
-            margin-bottom:35px;
-        }
-
-        .section h2{
-            color:#ffd000;
-            margin-bottom:15px;
-            border-bottom:1px solid #ffd000;
-            padding-bottom:10px;
-            font-size:26px;
-        }
-
-        .about{
-            line-height:1.8;
-            color:#dddddd;
-        }
-
-        .skills{
-            display:flex;
-            flex-wrap:wrap;
-            gap:15px;
-        }
-
-        .skill{
-            background:#ffd000;
-            color:#000;
-            padding:12px 18px;
-            border-radius:10px;
-            font-weight:bold;
-            transition:0.3s;
-        }
-
-        .skill:hover{
-            transform:scale(1.05);
-            cursor:pointer;
-        }
-
-        .experience{
-            background:#262626;
-            padding:20px;
-            border-left:4px solid #ffd000;
-            border-radius:10px;
-            margin-bottom:15px;
-        }
-
-        .experience h3{
-            color:#ffd000;
-            margin-bottom:10px;
-        }
-
-        .experience p{
-            color:#dddddd;
-            line-height:1.6;
-        }
-
-        .footer{
-            text-align:center;
-            margin-top:40px;
-            color:#888888;
-            font-size:14px;
-        }
-
-    </style>
+    #restartBtn{
+        margin-top:20px;
+        padding:12px 25px;
+        border:none;
+        background:#ffe600;
+        color:black;
+        font-size:20px;
+        border-radius:10px;
+        cursor:pointer;
+    }
+</style>
 </head>
+
 <body>
 
-    <div class="container">
+<div id="score">Score: 0</div>
 
-        <div class="header">
-            <h1>Manual QA Engineer</h1>
-            <p>Web & Mobile Testing Specialist</p>
-        </div>
+<div id="gameOver">
+    GAME OVER
+    <br>
+    <button id="restartBtn">Restart</button>
+</div>
 
-        <div class="section">
-            <h2>About Me</h2>
+<canvas id="gameCanvas"></canvas>
 
-            <p class="about">
-                Manual QA Engineer with experience in web and mobile testing.
-                Skilled in bug reporting, test documentation, API testing,
-                UI/UX validation, and software quality assurance processes.
-                Experienced in working with e-commerce and game development projects.
-            </p>
-        </div>
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-        <div class="section">
-            <h2>Skills</h2>
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-            <div class="skills">
-                <div class="skill">SQL</div>
-                <div class="skill">Manual QA</div>
-                <div class="skill">Test Documentation</div>
-                <div class="skill">Jira</div>
-                <div class="skill">Postman</div>
-                <div class="skill">UI/UX Testing</div>
-                <div class="skill">Web Testing</div>
-                <div class="skill">Mobile Testing</div>
-            </div>
-        </div>
+let score = 0;
+let gameEnded = false;
 
-        <div class="section">
-            <h2>Experience</h2>
+const ship = {
+    x: canvas.width / 2,
+    y: canvas.height - 100,
+    width: 60,
+    height: 60
+};
 
-            <div class="experience">
-                <h3>QA Engineer</h3>
+const bullets = [];
+const meteors = [];
 
-                <p>
-                    • Manual testing of web and mobile applications<br>
-                    • Creating test cases and bug reports<br>
-                    • API testing using Postman<br>
-                    • UI/UX validation and usability testing<br>
-                    • Regression, smoke, and functional testing<br>
-                    • Working with Jira for task and defect management
-                </p>
-            </div>
-        </div>
+const laserSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3");
+const boomSound = new Audio("https://assets.mixkit.co/active_storage/sfx/1018/1018-preview.mp3");
 
-        <div class="section">
-            <h2>Tools</h2>
+document.addEventListener("mousemove", (e) => {
+    ship.x = e.clientX - ship.width / 2;
+});
 
-            <div class="skills">
-                <div class="skill">Chrome DevTools</div>
-                <div class="skill">Android Studio</div>
-                <div class="skill">Postman</div>
-                <div class="skill">Jira</div>
-                <div class="skill">SQL</div>
-            </div>
-        </div>
+document.addEventListener("click", () => {
+    if(gameEnded) return;
 
-        <div class="footer">
-            Manual QA Resume • 2026
-        </div>
+    bullets.push({
+        x: ship.x + ship.width / 2 - 3,
+        y: ship.y
+    });
 
-    </div>
+    laserSound.currentTime = 0;
+    laserSound.play();
+});
+
+function createMeteor(){
+    meteors.push({
+        x: Math.random() * canvas.width,
+        y: -50,
+        size: Math.random() * 40 + 30,
+        speed: Math.random() * 3 + 2
+    });
+}
+
+setInterval(() => {
+    if(!gameEnded){
+        createMeteor();
+    }
+}, 1000);
+
+function drawShip(){
+    ctx.fillStyle = "#ffe600";
+
+    ctx.beginPath();
+    ctx.moveTo(ship.x + ship.width/2, ship.y);
+    ctx.lineTo(ship.x, ship.y + ship.height);
+    ctx.lineTo(ship.x + ship.width, ship.y + ship.height);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawBullets(){
+    ctx.fillStyle = "red";
+
+    bullets.forEach((bullet, index) => {
+        bullet.y -= 10;
+
+        ctx.fillRect(bullet.x, bullet.y, 6, 20);
+
+        if(bullet.y < 0){
+            bullets.splice(index,1);
+        }
+    });
+}
+
+function drawMeteors(){
+    ctx.fillStyle = "gray";
+
+    meteors.forEach((meteor, meteorIndex) => {
+        meteor.y += meteor.speed;
+
+        ctx.beginPath();
+        ctx.arc(meteor.x, meteor.y, meteor.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if(
+            meteor.y + meteor.size > ship.y &&
+            meteor.x > ship.x &&
+            meteor.x < ship.x + ship.width
+        ){
+            endGame();
+        }
+
+        bullets.forEach((bullet, bulletIndex) => {
+
+            const dx = bullet.x - meteor.x;
+            const dy = bullet.y - meteor.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if(distance < meteor.size){
+
+                meteors.splice(meteorIndex,1);
+                bullets.splice(bulletIndex,1);
+
+                score++;
+                document.getElementById("score").innerText = "Score: " + score;
+
+                boomSound.currentTime = 0;
+                boomSound.play();
+            }
+        });
+
+        if(meteor.y > canvas.height + 100){
+            meteors.splice(meteorIndex,1);
+        }
+    });
+}
+
+function drawStars(){
+    for(let i=0;i<100;i++){
+        ctx.fillStyle = "white";
+        ctx.fillRect(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            2,
+            2
+        );
+    }
+}
+
+function endGame(){
+    gameEnded = true;
+    document.getElementById("gameOver").style.display = "block";
+}
+
+document.getElementById("restartBtn").addEventListener("click", () => {
+    location.reload();
+});
+
+function animate(){
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawStars();
+    drawShip();
+    drawBullets();
+    drawMeteors();
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 
 </body>
 </html>
+```
